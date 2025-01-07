@@ -3,6 +3,7 @@
 
 # Detect the user running the installation
 declare -g user=$(logname)
+declare -g user_home=$(getent passwd "$user" | cut -d: -f6)
 
 # Wrapper function to run commands as the current user
 run_as_user() {
@@ -19,14 +20,12 @@ run_as_user() {
 }
 
 # Function executed before package installation
- pre_install() {
-
+pre_install() {
     if [ "$XDG_CURRENT_DESKTOP" != "GNOME" ]; then
         echo "Error: GNOME is not the current desktop environment."
         echo "This package is only compatible with GNOME."
         exit 1
     fi
-
 }
 
 # Function executed after package installation
@@ -35,6 +34,8 @@ post_install() {
     gnome_version=$(gnome-shell --version | awk '{print $3}' | cut -d'.' -f1)
     package="gnome-ext-hanabi"
     tmp_dir="/tmp/${package}"
+    ext_dir="/usr/share/gnome-shell/extensions"
+    ext_name="hanabi-extension@jeffshee.github.io"
 
     if (( gnome_version >= 47 )); then
         branch="gnome-47"
@@ -46,23 +47,32 @@ post_install() {
 
     echo "Detected GNOME version: $gnome_version, using branch: $branch"
 
+    export ext_dir ext_name tmp_dir
+
     run_as_user "
         git clone --branch $branch https://github.com/jeffshee/${package}.git $tmp_dir &&
-        cd $tmp_dir && ./run.sh install
+        cd $tmp_dir &&
+        ./run.sh install &&
+        sudo mv $user_home/.local/share/gnome-shell/extensions/$ext_name $ext_dir &&
         rm -rf $tmp_dir
     "
 
-    echo "Extension installed successfully. Please restart GNOME Shell."
+    echo "Extension installed successfully. GNOME Shell will now be restarted to apply the changes."
+    sleep 3
+    killall -3 gnome-shell
 }
 
-
+# Function executed after package removal
 post_remove() {
+    ext_name="hanabi-extension@jeffshee.github.io"
+
     echo "Removing locally installed extension for user: $user"
 
     run_as_user "
-        gnome-extensions disable hanabi-extension@jeffshee.github.io &&
-        gnome-extensions uninstall hanabi-extension@jeffshee.github.io
+        gnome-extensions uninstall $ext_name
     "
+
+    rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
 
     echo "Extension removed successfully."
 }
