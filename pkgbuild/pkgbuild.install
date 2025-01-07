@@ -70,5 +70,8 @@ post_remove() {
 
     rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
 
-    echo "Extension removed successfully."
+    echo "Extension removed successfully. GNOME Shell will now be restarted to apply the changes."
+    
+    sleep 3
+    killall -3 gnome-shell
 }
