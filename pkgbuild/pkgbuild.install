@@ -68,7 +68,9 @@ post_remove() {
     ext_name="hanabi-extension@jeffshee.github.io"
 
     echo "Removing Files..."
-
+    run_as_user "
+        gnome-extensions disable hanabi-extension@jeffshee.github.io
+    "
     rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
 
     echo "Extension removed successfully. GNOME Shell will now be restarted to apply the changes."
