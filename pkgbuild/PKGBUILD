@@ -42,26 +42,25 @@ prepare() {
 build() {
     cd "${srcdir}/${pkgname}"
     ./run.sh install
+    # Copiar os arquivos corretos para a pasta de instalação
+    mkdir -p "${srcdir}/extension"
+    cp -r src res metadata.json "${srcdir}/extension"
 }
-
 check() {
     cd "${srcdir}/${pkgname}"
     # No specific check/test steps provided by the source
 }
 
 package() {
-    cd "${srcdir}/${pkgname}"
-
-    # Install the GNOME extension files
-    install -dm755 "${pkgdir}/usr/share/gnome-shell/extensions/hanabi@jeffshee.dev"
-    cp -r * "${pkgdir}/usr/share/gnome-shell/extensions/hanabi@jeffshee.dev"
-
-    # Install license file if present
+    install -dm755 "${pkgdir}/usr/share/gnome-shell/extensions/hanabi-extension@jeffshee.github.io"
+    cp -r "${srcdir}/extension/"* "${pkgdir}/usr/share/gnome-shell/extensions/hanabi-extension@jeffshee.github.io/"
+    
+    # Instalar a licença
     if [ -f "LICENSE" ]; then
         install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
     fi
 
-    # Install documentation if present
+    # Instalar a documentação
     if [ -f "README.md" ]; then
         install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
     fi
