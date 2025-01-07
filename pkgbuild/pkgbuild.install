@@ -74,7 +74,7 @@ post_remove() {
         gnome-extensions disable $ext_name
     "
 
-    #rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
+    rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
 
     echo "Extension removed successfully."
     echo "Please save your work and restart GNOME Shell manually by logging out and logging back in."
