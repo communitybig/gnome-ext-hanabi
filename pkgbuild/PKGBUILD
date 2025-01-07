@@ -10,6 +10,7 @@ pkgrel=$(date +%H%M)
 arch=('any')
 license=('MIT')
 url="https://github.com/communitybig/${pkgname}"
+source=("git+https://github.com/jeffshee/gnome-ext-hanabi.git")
 md5sums=('SKIP')
 
 # Automatically detect and use the correct install file
