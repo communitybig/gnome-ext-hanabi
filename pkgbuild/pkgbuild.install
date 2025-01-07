@@ -66,11 +66,7 @@ post_install() {
 post_remove() {
     ext_name="hanabi-extension@jeffshee.github.io"
 
-    echo "Removing locally installed extension for user: $user"
-
-    run_as_user "
-        gnome-extensions disable $ext_name
-    "
+    echo "Removing Files..."
 
     rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
 
