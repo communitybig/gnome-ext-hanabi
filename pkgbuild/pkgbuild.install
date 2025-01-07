@@ -67,14 +67,18 @@ post_install() {
 post_remove() {
     ext_name="hanabi-extension@jeffshee.github.io"
 
-    echo "Removing Files..."
+    echo "Removing files..."
+
     run_as_user "
-        gnome-extensions disable hanabi-extension@jeffshee.github.io
+        export DBUS_SESSION_BUS_ADDRESS=\$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/\$(pgrep -u $user -n gnome-shell)/environ | tr '\0' '\n' | sed -e 's/DBUS_SESSION_BUS_ADDRESS=//') &&
+        gnome-extensions disable $ext_name &&
+        gnome-extensions uninstall $ext_name
     "
+
     rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
 
     echo "Extension removed successfully. GNOME Shell will now be restarted to apply the changes."
-    
+
     sleep 3
     killall -3 gnome-shell
 }
