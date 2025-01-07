@@ -3,15 +3,14 @@
 
 pkgname=gnome-ext-hanabi
 pkgdesc="Hanabi video wallpaper extension for GNOME"
-depends=('gnome-shell' 'curl' 'xdg-utils' 'unzip' 'meson')
+depends=('gnome-shell' 'curl' 'xdg-utils' 'unzip' 'meson' 'ninja')
 makedepends=('git')
 pkgver=$(date +%y.%m.%d)
 pkgrel=$(date +%H%M)
 arch=('any')
 license=('MIT')
 url="https://github.com/communitybig/${pkgname}"
-source=()
-md5sums=()
+md5sums=('SKIP')
 
 # Automatically detect and use the correct install file
 if [ -e "${pkgname}.install" ]; then
@@ -21,46 +20,47 @@ elif [ -e "pkgbuild.install" ]; then
 fi
 
 prepare() {
-    # Detect GNOME version and select the appropriate branch
-    local gnome_version
-    gnome_version=$(gnome-shell --version | awk '{print $3}' | cut -d'.' -f1)
-
-    if (( gnome_version >= 47 )); then
-        branch="gnome-47"
-    elif (( gnome_version >= 45 )); then
-        branch="main"
-    else
-        branch="legacy"
-    fi
-
-    msg "Detected GNOME version: $gnome_version, using branch: $branch"
-
-    # Clone the appropriate branch from the original repo
-    git clone --branch "$branch" "https://github.com/jeffshee/${pkgname}.git" "${srcdir}/${pkgname}"
+    cd "${srcdir}/${pkgname}"
+    # Add any preparation steps here, if needed
+    # For example: patch -p1 < "${srcdir}/patch-file.patch"
 }
 
 build() {
     cd "${srcdir}/${pkgname}"
-    ./run.sh install
-    # Copiar os arquivos corretos para a pasta de instalação
-    mkdir -p "${srcdir}/extension"
-    cp -r src res metadata.json "${srcdir}/extension"
+    # Add build steps here, if needed
+    # For example: make
 }
+
 check() {
     cd "${srcdir}/${pkgname}"
-    # No specific check/test steps provided by the source
+    # Add check/test steps here, if needed
+    # For example: make check
 }
 
 package() {
-    install -dm755 "${pkgdir}/usr/share/gnome-shell/extensions/hanabi-extension@jeffshee.github.io"
-    cp -r "${srcdir}/extension/"* "${pkgdir}/usr/share/gnome-shell/extensions/hanabi-extension@jeffshee.github.io/"
-    
-    # Instalar a licença
+    cd "${srcdir}/${pkgname}"
+
+    # Determine the correct source directory
+    if [ -d "${pkgname}" ]; then
+        srcdir="${srcdir}/${pkgname}/${pkgname}"
+    else
+        srcdir="${srcdir}/${pkgname}"
+    fi
+
+    # Install files
+    local dirs=("usr" "etc" "opt")
+    for dir in "${dirs[@]}"; do
+        if [ -d "${srcdir}/${dir}" ]; then
+            cp -a "${srcdir}/${dir}" "${pkgdir}/"
+        fi
+    done
+
+    # Install license file if present
     if [ -f "LICENSE" ]; then
         install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
     fi
 
-    # Instalar a documentação
+    # Install documentation if present
     if [ -f "README.md" ]; then
         install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
     fi
