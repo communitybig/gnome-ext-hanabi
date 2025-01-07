@@ -1,21 +1,17 @@
-# Maintainer: Tales A. Mendonça <talesam@gmail.com>
+# Maintainer (original): jeffshee - https://github.com/jeffshee
+# Modified by: Leonardo Berbert <leo4berbert@gmail.com>
 
-pkgname=pkgbuild-template
-pkgdesc="Package template for Communitybig"
-# Uncomment and edit the following lines as needed
-#depends=('')
-#makedepends=('')
-#optdepends=('')
-#conflicts=('')
-#provides=('')
-#replaces=('')
+pkgname=gnome-ext-hanabi
+pkgdesc="Hanabi video wallpaper extension for GNOME"
+depends=('gnome-shell' 'curl' 'xdg-utils' 'unzip' 'meson')
+makedepends=('git')
 pkgver=$(date +%y.%m.%d)
 pkgrel=$(date +%H%M)
 arch=('any')
 license=('MIT')
 url="https://github.com/communitybig/${pkgname}"
-source=("git+${url}.git")
-md5sums=('SKIP')
+source=()
+md5sums=()
 
 # Automatically detect and use the correct install file
 if [ -e "${pkgname}.install" ]; then
@@ -25,40 +21,40 @@ elif [ -e "pkgbuild.install" ]; then
 fi
 
 prepare() {
-    cd "${srcdir}/${pkgname}"
-    # Add any preparation steps here, if needed
-    # For example: patch -p1 < "${srcdir}/patch-file.patch"
+    # Detect GNOME version and select the appropriate branch
+    local gnome_version
+    gnome_version=$(gnome-shell --version | awk '{print $3}' | cut -d'.' -f1)
+
+    if (( gnome_version >= 47 )); then
+        branch="gnome-47"
+    elif (( gnome_version >= 45 )); then
+        branch="main"
+    else
+        branch="legacy"
+    fi
+
+    msg "Detected GNOME version: $gnome_version, using branch: $branch"
+
+    # Clone the appropriate branch from the original repo
+    git clone --branch "$branch" "https://github.com/jeffshee/${pkgname}.git" "${srcdir}/${pkgname}"
 }
 
 build() {
     cd "${srcdir}/${pkgname}"
-    # Add build steps here, if needed
-    # For example: make
+    ./run.sh install
 }
 
 check() {
     cd "${srcdir}/${pkgname}"
-    # Add check/test steps here, if needed
-    # For example: make check
+    # No specific check/test steps provided by the source
 }
 
 package() {
     cd "${srcdir}/${pkgname}"
 
-    # Determine the correct source directory
-    if [ -d "${pkgname}" ]; then
-        srcdir="${srcdir}/${pkgname}/${pkgname}"
-    else
-        srcdir="${srcdir}/${pkgname}"
-    fi
-
-    # Install files
-    local dirs=("usr" "etc" "opt")
-    for dir in "${dirs[@]}"; do
-        if [ -d "${srcdir}/${dir}" ]; then
-            cp -a "${srcdir}/${dir}" "${pkgdir}/"
-        fi
-    done
+    # Install the GNOME extension files
+    install -dm755 "${pkgdir}/usr/share/gnome-shell/extensions/hanabi@jeffshee.dev"
+    cp -r * "${pkgdir}/usr/share/gnome-shell/extensions/hanabi@jeffshee.dev"
 
     # Install license file if present
     if [ -f "LICENSE" ]; then
