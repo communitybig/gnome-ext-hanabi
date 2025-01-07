@@ -58,8 +58,8 @@ post_install() {
     "
 
     echo "Extension installed successfully. GNOME Shell will now be restarted to apply the changes."
-    sleep 3
-    killall -3 gnome-shell
+    #sleep 3
+    #killall -3 gnome-shell
 }
 
 # Function executed after package removal
@@ -69,7 +69,7 @@ post_remove() {
     echo "Removing locally installed extension for user: $user"
 
     run_as_user "
-        gnome-extensions uninstall $ext_name
+        gnome-extensions disable $ext_name
     "
 
     rm -rf "/usr/share/gnome-shell/extensions/$ext_name"
