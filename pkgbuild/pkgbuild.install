@@ -52,14 +52,14 @@ post_install() {
     run_as_user "
         git clone --branch $branch https://github.com/jeffshee/${package}.git $tmp_dir &&
         cd $tmp_dir &&
-        ./run.sh install &&
-        sudo mv $user_home/.local/share/gnome-shell/extensions/$ext_name $ext_dir &&
-        rm -rf $tmp_dir
+        ./run.sh install
     "
+    mv $user_home/.local/share/gnome-shell/extensions/$ext_name $ext_dir
+    rm -rf /tmp/$ext_name
 
     echo "Extension installed successfully. GNOME Shell will now be restarted to apply the changes."
-    #sleep 3
-    #killall -3 gnome-shell
+    sleep 3
+    killall -3 gnome-shell
 }
 
 # Function executed after package removal
